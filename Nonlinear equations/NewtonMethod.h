@@ -61,8 +61,8 @@ double newtonMethod(double a, double b, double x0, double (*f)(double), double e
         x = x - h;
         n++;
 
-    } while (abs(h) > epsilon);
-
+    } while (abs(f(x)) > epsilon);
+    std::cout << n << "|\tx:\t" << x << "\tf(x)\t" << f(x) << std::endl;
     //std::cout << "The value of the root is : " << x;
     return x;
 }

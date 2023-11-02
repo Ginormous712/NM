@@ -1,6 +1,9 @@
 #pragma once
 #include <iostream>
 #include <cmath>
+#include <cassert>
+#include <iomanip>
+
 using namespace std;
 
 // Given function  x^3 - 7x^2 - x + 7 = 0
@@ -30,18 +33,18 @@ double fixedPointMethod(double a, double b, double x0,
     std::cout << "Number od iterations:\t";
     std::cout << (int)(log((abs(g(x0) - x0)) / ((1 - q) * epsilon)) / log(1/q)) + 1 << std::endl;
 
-
-    double x;
+    double x = x0;
     int n = 1;
     do
     {
+        std::cout << n << "|\tx:\t" << fixed << setprecision(4) << x << "\t |x - g(x)|\t" << abs(x - g(x)) << std::endl;
         x = g(x0);
-        std::cout << n << "|\tx:\t" << x << "\t x - g(x)\t" << x - g(x) << std::endl;
+
         x0 = x;
         n++;
-        
-    } while (abs((x - g(x)) > epsilon));
-
+        assert(x > a || x < b);
+    } while (abs(x - g(x)) > epsilon);
+    std::cout << n << "|\tx:\t" << fixed << setprecision(4) << x << "\t |x - g(x)|\t" << abs(x - g(x)) << std::endl;
     //std::cout << "The value of the root is : " << x;
     return x;
 }
