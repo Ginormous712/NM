@@ -1,20 +1,54 @@
-﻿// Lab2.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+﻿#include <iostream>
+#include "Matrix.h"
 
-#include <iostream>
+#define SPACE "*************************************************\n"
+
+using namespace std;
+
+
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    vector<vector<double>> data = {
+        {4.0, 3.0, 1.0, 0.0},
+        {-2.0, 2.0, 6.0, 1.0},
+        {0.0, 5.0, 2.0, 3.0},
+        {0.0, 1.0, 2.0, 7.0}
+    };
+
+    vector<double> b = { 14,31,33,45 };
+
+    try 
+    {
+        SquareMatrix a(data);
+        cout << SPACE;
+        cout << "The square matrix was created successfully." << endl;
+        cout << SPACE;
+        cout << "Matrix A:\n" << a;
+        cout << SPACE;
+        cout << "Determiant of matrix A:\t" << a.determinant() << endl;
+        cout << SPACE;
+        cout << "Invesre matrix to A:\n";
+        SquareMatrix inverse = a.findInverseMatrix();
+        cout << inverse;
+        cout << SPACE;
+        cout << "Solving linear system using Gaussian method:\n";
+        cout << "Vector b:\t";
+        for (size_t i = 0; i < b.size(); i++)
+        {
+            cout << b[i] << " ";
+        }
+        cout << endl;
+        vector<double> result = a.solveLinearSystemGauss(b);
+        for (size_t i = 0; i < b.size(); i++)
+        {
+            cout << result[i] << " ";
+        }
+        cout << endl;
+    }
+    catch (const invalid_argument& e) 
+    {
+        cerr << "Error: " << e.what() << endl;
+    }
+
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
