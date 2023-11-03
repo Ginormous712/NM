@@ -24,6 +24,7 @@
     <ProjectGuid>{4b003ef2-bd33-4c0c-9a9b-65ce56afc4ba}</ProjectGuid>
     <RootNamespace>Nonlinearequations</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Lab1</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
