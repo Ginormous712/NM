@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <iomanip>
 
 using namespace std;
 
@@ -99,11 +100,11 @@ public:
         {
             for (int j = 0; j < matrix.cols; j++) 
             {
-                os << matrix.data[i][j] << " ";
+                os << setprecision(4) << fixed << setw(10) << matrix.data[i][j] << " ";
             }
             os << endl;
         }
-
+        cout.unsetf(ios::fixed);
         return os;
     }
 
@@ -168,25 +169,26 @@ public:
             setElement(i, colIndex, column[i]);
         }
     }
-};
 
-class SquareMatrix : public Matrix
-{
-public:
-    SquareMatrix(int n) : Matrix(n, n)
+    vector<double> getColumn(int columnIndex) const 
     {
-
-    }
-
-    SquareMatrix(const vector<vector<double>>& data) : Matrix(data) 
-    {
-        if (getRows() != getCols()) 
+        if (columnIndex < 0 || columnIndex >= cols) 
         {
-            throw invalid_argument("A square matrix must have the same number of rows and columns.");
+            throw out_of_range("Invalid column index");
         }
+
+        vector<double> column;
+        column.reserve(rows);
+
+        for (int i = 0; i < rows; i++) 
+        {
+            column.push_back(data[i][columnIndex]);
+        }
+
+        return column;
     }
-    ///*
-    void gaussianElimination()
+
+    void gaussianSimpleElimination()
     {
         for (int i = 0; i < rows; i++)
         {
@@ -224,31 +226,78 @@ public:
             }
         }
     }
-    //*/
-    /*
-    void gaussianElimination() {
-        for (int i = 0; i < rows; ++i) {
-            if (data[i][i] == 0.0) {
-                throw std::runtime_error("ћатриц€ не маЇ ун≥кального розв'€зку");
+
+    void gaussianElimination()
+    {
+        for (int i = 0; i < getRows(); i++)
+        {
+            double maxVal = abs(data[i][i]);
+            int maxRow = i;
+            for (int k = i + 1; k < getRows(); k++)
+            {
+                if (abs(data[k][i]) > maxVal)
+                {
+                    maxVal = abs(data[k][i]);
+                    maxRow = k;
+                }
             }
 
-            for (int j = i + 1; j < rows; ++j) {
-                double factor = data[j][i] / data[i][i];
-                for (int k = i; k < cols; ++k) {
-                    data[j][k] -= factor * data[i][k];
+            if (maxRow != i)
+            {
+                for (int k = i; k < getCols(); k++)
+                {
+                    swap(data[i][k], data[maxRow][k]);
+                }
+            }
+
+            double pivot = data[i][i];
+
+            for (int k = i; k < getCols(); k++)
+            {
+                data[i][k] /= pivot;
+            }
+
+            for (int j = 0; j < getRows(); j++)
+            {
+                if (j != i)
+                {
+                    double factor = data[j][i];
+                    for (int k = i; k < getCols(); k++)
+                    {
+                        data[j][k] -= factor * data[i][k];
+                    }
                 }
             }
         }
     }
-    */
+};
+
+
+class SquareMatrix : public Matrix
+{
+public:
+    SquareMatrix(int n) : Matrix(n, n)
+    {
+
+    }
+
+    SquareMatrix(const vector<vector<double>>& data) : Matrix(data) 
+    {
+        if (getRows() != getCols()) 
+        {
+            throw invalid_argument("A square matrix must have the same number of rows and columns.");
+        }
+    }
+    
     double determinant()
     {
+        SquareMatrix copy(*this);
         double det = 1.0;
-        gaussianElimination();
+        copy.gaussianSimpleElimination();
 
-        for (int i = 0; i < rows; i++)
+        for (int i = 0; i < copy.rows; i++)
         {
-            det *= data[i][i];
+            det *= copy.data[i][i];
         }
         return det;
     }
@@ -260,57 +309,60 @@ public:
             throw runtime_error("The system of equations has no unique solution");
         }
 
-        gaussianElimination();
-
-        vector<double> x(rows, 0.0);
-
-        for (int i = rows - 1; i >= 0; i--)
+        Matrix system(rows, cols + 1);
+        for (size_t i = 0; i < system.getRows(); i++)
         {
-            double sum = 0.0;
-            for (int j = i + 1; j < rows; j++)
+            for (size_t j = 0; j < system.getCols(); j++)
             {
-                sum += data[i][j] * x[j];
+                if (j == system.getCols() - 1)
+                {
+                    system.setElement(i, j, b[i]);
+                }
+                else
+                {
+                    system.setElement(i, j, getElement(i, j));
+                }
             }
-
-            x[i] = (b[i] - sum) / data[i][i];
         }
-
-        return x;
+        
+        //cout << system;
+        system.gaussianElimination();
+        
+        return system.getColumn(system.getCols() - 1);
     }
-
-    SquareMatrix findInverseMatrix() 
+    
+    SquareMatrix findInverseMatrixGauss() 
     {
-        SquareMatrix A_inv(getRows());
-        SquareMatrix A_copy(*this); 
+        int n = getRows();
+        vector<vector<double>> augmented(n, vector<double>(2 * n, 0.0));
 
-        try 
+        for (int i = 0; i < n; i++) 
         {
-            double det = determinant();
-
-            if (det == 0.0) 
+            for (int j = 0; j < n; j++) 
             {
-                throw runtime_error("Matrix has no inverse matrix (determinant = 0)");
-            }
-
-            A_copy.gaussianElimination();
-
-            for (int i = 0; i < getRows(); i++) 
-            {
-                vector<double> b(getRows(), 0.0);
-                b[i] = 1.0; 
-
-                vector<double> x = A_copy.solveLinearSystemGauss(b);
-                A_inv.setColumn(i, x);
+                augmented[i][j] = getElement(i, j);
+                if (i == j) 
+                {
+                    augmented[i][j + n] = 1.0;
+                }
             }
         }
-        catch (const runtime_error& e) 
+
+        Matrix augmetedMatrix(augmented);
+        augmetedMatrix.gaussianElimination();
+
+        SquareMatrix inverseMatrix(n);
+
+        for (int i = 0; i < n; i++) 
         {
-            cerr << "Error: " << e.what() << endl;
+            for (int j = 0; j < n; j++) 
+            {
+                inverseMatrix.setElement(i, j, augmetedMatrix.getElement(i, j + n));
+            }
         }
 
-        return A_inv;
+        return inverseMatrix;
     }
-
 };
 
 
