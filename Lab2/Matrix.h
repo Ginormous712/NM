@@ -5,6 +5,7 @@
 
 using namespace std;
 
+//TODO 2 and 3 task
 class Matrix 
 {
 protected:
@@ -270,6 +271,21 @@ public:
             }
         }
     }
+
+    bool isTridiagonal() const
+    {
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                if (std::abs(i - j) > 1 && data[i][j] != 0)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 };
 
 
@@ -363,6 +379,76 @@ public:
 
         return inverseMatrix;
     }
+};
+
+class TridiagonalMatrix : SquareMatrix
+{
+public:
+    TridiagonalMatrix(const vector<vector<double>>& matrixData) : SquareMatrix(matrixData)
+    {
+        if (!isTridiagonal())
+        {
+            throw invalid_argument("The matrix is not tridiagonal");
+        }
+    }
+    
+    vector<double> tridiagonalSolve(const vector<double>& d) const 
+    {
+        if (rows != d.size()) {
+            throw invalid_argument("The dimension of the right-hand side vector does not correspond to the dimension of the matrix");
+        }
+
+        vector<double> a, b, c;
+        a.reserve(rows);
+        b.reserve(rows);
+        c.reserve(rows);
+
+        for (int i = 0; i < rows; i++)
+        {
+            if (i > 0) 
+            {
+                a.push_back(data[i][i - 1]);
+            }
+            else 
+            {
+                a.push_back(0.0);
+            }
+            
+            b.push_back(data[i][i]);
+            
+            if (i < rows - 1) 
+            {
+                c.push_back(data[i][i + 1]);
+            }
+            else 
+            {
+                c.push_back(0.0);
+            }
+        }
+
+        vector<double> alpha(rows);
+        vector<double> beta(rows);
+        vector<double> x(rows);
+
+        alpha[0] = b[0];
+        beta[0] = d[0] / alpha[0];
+
+        for (int i = 1; i < rows; i++) 
+        {
+            alpha[i] = b[i] - a[i] * c[i - 1] / alpha[i - 1];
+            beta[i] = (d[i] - a[i] * beta[i - 1]) / alpha[i];
+        }
+
+        x[rows - 1] = beta[rows - 1];
+
+        for (int i = rows - 2; i >= 0; i--) 
+        {
+            x[i] = beta[i] - c[i] * x[i + 1] / alpha[i];
+        }
+
+        return x;
+    }
+
 };
 
 
