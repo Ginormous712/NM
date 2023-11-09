@@ -271,7 +271,7 @@ public:
             }
         }
     }
-
+    
     bool isTridiagonal() const
     {
         for (int i = 0; i < rows; i++)
@@ -286,6 +286,34 @@ public:
         }
         return true;
     }
+    
+    void solveAndPrint(const vector<double>& b, const vector<double>& solution) const
+    {
+        cout << "Vector b:\n";
+        printVector(b, false);
+
+        cout << "Solution using the specified method:\n";
+        printVector(solution, true);
+    }
+
+    void printVector(const vector<double>& vector, bool flag) const 
+    {
+        char c;
+        if (flag)
+        {
+            c = 'x';
+        }
+        else
+        {
+            c = 'b';
+        }
+        for (size_t i = 0; i < vector.size(); i++)
+        {
+            cout << c << i + 1 << " = " << vector[i] << ";\t";
+        }
+        cout << endl;
+    }
+
 };
 
 
@@ -303,6 +331,7 @@ public:
         {
             throw invalid_argument("A square matrix must have the same number of rows and columns.");
         }
+        cout << "The square matrix was created successfully." << endl;
     }
     
     double determinant()
@@ -381,7 +410,7 @@ public:
     }
 };
 
-class TridiagonalMatrix : SquareMatrix
+class TridiagonalMatrix : public SquareMatrix
 {
 public:
     TridiagonalMatrix(const vector<vector<double>>& matrixData) : SquareMatrix(matrixData)
@@ -448,6 +477,8 @@ public:
 
         return x;
     }
+
+
 
 };
 
